@@ -1,0 +1,340 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;700;900&display=swap');
+
+/* ── RESET & BASE ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --orange: #FF4500;
+  --black: #0a0a0a;
+  --white: #f5f5f5;
+  --gray: #888;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── YOU BUTTON ── */
+.you-btn {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.6rem;
+  z-index: 100;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--black);
+  background: var(--white);
+  text-decoration: none;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: none;
+}
+
+/* 파도 레이어 */
+.you-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--black);
+  clip-path: polygon(110% 45%, 110% 55%, 110% 110%, 110% 110%);
+  z-index: 0;
+}
+
+/* 물보라 레이어 (크레스트 끝) */
+.you-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.12);
+  clip-path: polygon(110% 45%, 110% 55%, 110% 110%, 110% 110%);
+  z-index: 0;
+}
+
+/* 텍스트는 파도 위에 */
+.you-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* 호버 시 발리 파도 */
+.you-btn:hover::before {
+  animation: bali-wave 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.you-btn:hover::after {
+  animation: bali-foam 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.you-btn:hover .you-text {
+  animation: bali-text 3s ease infinite;
+}
+
+/*
+  발리 파도 타이밍 (3.6s 기준)
+  ├─ 0   ~ 28%  스웰 접근   — ease-in  (천천히 부풀며 오름)
+  ├─ 28% ~ 42%  립 던져짐   — cubic 급가속 (피크→배럴)
+  ├─ 42% ~ 50%  배럴 홀드   — linear  (튜브 유지)
+  ├─ 50% ~ 62%  크래시      — ease-out (폭발적 왼쪽 스윕)
+  ├─ 62% ~ 78%  워시        — ease    (물 밀려나감)
+  ├─ 78% ~ 90%  해변 유지   — ease
+  └─ 90% ~ 100% 리시드      — ease-in  (서서히 빠짐)
+*/
+@keyframes bali-wave {
+  0% {
+    clip-path: polygon(110% 45%, 110% 55%, 110% 110%, 110% 110%);
+    animation-timing-function: ease-in;
+  }
+  18% {
+    /* 스웰 오른쪽 급경사 면 형성 */
+    clip-path: polygon(92% 8%, 108% 32%, 110% 72%, 110% 110%, 95% 110%);
+    animation-timing-function: ease-in;
+  }
+  28% {
+    /* 피크 — 크레스트 형성, 립이 막 앞으로 나오기 시작 */
+    clip-path: polygon(52% -6%, 92% 8%, 108% 42%, 110% 82%, 110% 110%, 84% 110%);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.2, 1); /* 급가속 */
+  }
+  42% {
+    /* ★ 배럴 — 립이 왼쪽으로 크게 돌출, 아랫부분은 아직 오른쪽 */
+    clip-path: polygon(-2% 0%, 48% -12%, 88% 4%, 108% 46%, 110% 94%, 110% 110%, 55% 110%);
+    animation-timing-function: linear;
+  }
+  50% {
+    /* 배럴 홀드 — 튜브 형태 유지 */
+    clip-path: polygon(-8% 5%, 42% -12%, 85% 4%, 107% 50%, 110% 100%, 110% 110%, 40% 110%);
+    animation-timing-function: cubic-bezier(0.2, 0, 0.4, 1); /* 폭발적 크래시 */
+  }
+  62% {
+    /* 크래시 완료 — 왼쪽 끝까지 스윕 */
+    clip-path: polygon(-10% -5%, 5% -12%, 60% -8%, 96% 16%, 110% 68%, 110% 110%, -10% 110%);
+    animation-timing-function: ease;
+  }
+  72% {
+    /* 워시 — 완전히 덮임 */
+    clip-path: polygon(-10% -10%, 110% -10%, 110% 110%, -10% 110%);
+    animation-timing-function: ease;
+  }
+  88% {
+    /* 해변 유지 */
+    clip-path: polygon(-10% -10%, 110% -10%, 110% 110%, -10% 110%);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    /* 리시드 */
+    clip-path: polygon(110% 45%, 110% 55%, 110% 110%, 110% 110%);
+  }
+}
+
+@keyframes bali-foam {
+  0%   {
+    clip-path: polygon(110% 45%, 110% 55%, 110% 110%, 110% 110%);
+    opacity: 0.12;
+    animation-timing-function: ease-in;
+  }
+  18%  {
+    clip-path: polygon(88% 3%, 105% 26%, 110% 62%, 110% 110%, 92% 110%);
+    animation-timing-function: ease-in;
+  }
+  28%  {
+    clip-path: polygon(44% -10%, 88% 3%, 106% 34%, 110% 72%, 110% 110%, 80% 110%);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.2, 1);
+  }
+  42%  {
+    /* 크레스트 앞쪽 물보라 — 배럴보다 조금 앞서 있음 */
+    clip-path: polygon(-8% -4%, 40% -16%, 84% 0%, 106% 40%, 110% 88%, 110% 110%, 48% 110%);
+    opacity: 0.18;
+    animation-timing-function: ease-out;
+  }
+  58%  {
+    clip-path: polygon(-10% -10%, 110% -10%, 110% 110%, -10% 110%);
+    opacity: 0.08;
+  }
+  75%  { opacity: 0; }
+  100% {
+    clip-path: polygon(-10% -10%, 110% -10%, 110% 110%, -10% 110%);
+    opacity: 0;
+  }
+}
+
+@keyframes bali-text {
+  0%, 32%  { color: var(--black); }
+  50%, 85% { color: var(--white); }
+  96%, 100%{ color: var(--black); }
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Top text */
+.hero-top {
+  position: relative;
+  z-index: 10;
+  padding: 7rem 2rem 0;
+}
+
+.hero-title {
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 9rem);
+  color: var(--orange);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+}
+
+/* Image */
+.hero-image-area {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--black);
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.55);
+}
+
+.hero-img[src="hero.jpg"] {
+  color: transparent;
+}
+
+/* Bottom overlay text */
+.hero-bottom {
+  position: relative;
+  z-index: 10;
+  padding: 0 2rem 3.5rem;
+}
+
+.hero-cta {
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 7rem);
+  color: var(--orange);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+}
+
+.hero-sub {
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 7rem);
+  color: var(--orange);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+}
+
+/* Corner info */
+.corner-info {
+  position: absolute;
+  bottom: 3.5rem;
+  right: 2rem;
+  z-index: 10;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--orange);
+  text-align: right;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+/* ── MENU LIST ── */
+.menu-list {
+  background: var(--black);
+  border-top: 1px solid #222;
+  padding: 0 2rem;
+}
+
+.menu-list ul {
+  list-style: none;
+}
+
+.menu-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 1.6rem 0;
+  border-bottom: 1px solid #1e1e1e;
+  transition: background 0.15s;
+}
+
+.menu-item:hover {
+  background: #111;
+  margin: 0 -2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.menu-number {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gray);
+  letter-spacing: 0.1em;
+  min-width: 2rem;
+}
+
+.menu-link {
+  font-family: 'Bebas Neue', 'Impact', sans-serif;
+  font-size: clamp(2rem, 5vw, 4rem);
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.menu-item:hover .menu-link {
+  color: var(--orange);
+}
+
+.menu-desc {
+  font-size: 0.75rem;
+  color: var(--gray);
+  letter-spacing: 0.05em;
+  margin-left: auto;
+  padding-right: 0.5rem;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: clamp(2.8rem, 14vw, 5rem);
+  }
+  .hero-cta,
+  .hero-sub {
+    font-size: clamp(2.2rem, 12vw, 4rem);
+  }
+  .corner-info {
+    display: none;
+  }
+  .menu-desc {
+    display: none;
+  }
+}

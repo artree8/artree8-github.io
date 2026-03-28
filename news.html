@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>READ NEWS — ARTREE8</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── NEWS PAGE SPECIFIC ── */
+    body { background: var(--black); }
+
+    .news-header {
+      padding: 7rem 2rem 2rem;
+      border-bottom: 1px solid #222;
+    }
+
+    .news-header-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--orange);
+      margin-bottom: 0.6rem;
+    }
+
+    .news-header-title {
+      font-family: 'Bebas Neue', 'Impact', sans-serif;
+      font-size: clamp(3rem, 8vw, 7rem);
+      color: var(--white);
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+    }
+
+    .news-header-meta {
+      margin-top: 1.2rem;
+      font-size: 0.7rem;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── ARTICLE LIST ── */
+    .news-list {
+      padding: 0 2rem;
+    }
+
+    .news-item {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr auto;
+      gap: 1.2rem;
+      align-items: start;
+      padding: 2rem 0;
+      border-bottom: 1px solid #1e1e1e;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+    }
+
+    .news-item:hover {
+      background: #111;
+      margin: 0 -2rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+
+    .news-item:hover .news-item-title {
+      color: var(--orange);
+    }
+
+    .news-item-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+      padding-top: 0.35rem;
+    }
+
+    .news-item-body { min-width: 0; }
+
+    .news-item-source {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: var(--orange);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+
+    .news-item-title {
+      font-family: 'Bebas Neue', 'Impact', sans-serif;
+      font-size: clamp(1.4rem, 3.5vw, 2.6rem);
+      color: var(--white);
+      line-height: 1;
+      letter-spacing: 0.02em;
+      transition: color 0.15s;
+      margin-bottom: 0.5rem;
+    }
+
+    .news-item-desc {
+      font-size: 0.78rem;
+      color: var(--gray);
+      line-height: 1.55;
+      max-width: 60ch;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .news-item-date {
+      font-size: 0.62rem;
+      color: var(--gray);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      padding-top: 0.35rem;
+    }
+
+    /* ── LOADING / ERROR STATE ── */
+    .state-box {
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .state-box p {
+      color: var(--gray);
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      line-height: 1.7;
+    }
+
+    .state-box .state-title {
+      font-family: 'Bebas Neue', 'Impact', sans-serif;
+      font-size: 2.5rem;
+      color: var(--white);
+      margin-bottom: 0.8rem;
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gray);
+      text-decoration: none;
+      padding: 2rem;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--orange); }
+
+    @media (max-width: 600px) {
+      .news-item {
+        grid-template-columns: 2rem 1fr;
+      }
+      .news-item-date { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- YOU button (fixed, top-right) -->
+  <a href="index.html" class="you-btn"><span class="you-text">you</span></a>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <a href="index.html" class="site-name" style="text-decoration:none;">ARTREE8</a>
+    <span class="header-tag">news</span>
+  </header>
+
+  <!-- NEWS HEADER -->
+  <div class="news-header">
+    <div class="news-header-label">ARTPULSE.IM — ARTNEWS</div>
+    <h1 class="news-header-title">READ<br />NEWS</h1>
+    <div class="news-header-meta" id="fetchMeta">Loading...</div>
+  </div>
+
+  <!-- ARTICLE LIST -->
+  <main class="news-list" id="newsList">
+    <div class="state-box" id="loadingState">
+      <div class="state-title">LOADING</div>
+      <p>artpulse.im에서 뉴스를 불러오는 중입니다...</p>
+    </div>
+  </main>
+
+
+  <script>
+    const LIST = document.getElementById('newsList');
+    const META = document.getElementById('fetchMeta');
+
+    // 1차: 로컬 news-data.json (스크래퍼 실행 후 생성)
+    async function loadFromJson() {
+      const res = await fetch('news-data.json');
+      if (!res.ok) throw new Error('no json');
+      return res.json();
+    }
+
+    // 2차: artpulse.im RSS/API 직접 시도
+    async function loadFromSite() {
+      // CORS 문제로 일반 fetch는 차단될 수 있음 — allorigins 프록시 경유
+      const target = encodeURIComponent('https://artpulse.im/artnews');
+      const proxy = `https://api.allorigins.win/get?url=${target}`;
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
+      const json = await res.json();
+      const html = json.contents;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const articles = [];
+      const seen = new Set();
+
+      // 제목이 될 만한 요소 탐색
+      const candidates = doc.querySelectorAll('h1,h2,h3,h4,article,li');
+      candidates.forEach(el => {
+        const linkEl = el.tagName === 'A' ? el : el.querySelector('a');
+        const title = el.querySelector('h1,h2,h3,h4')?.textContent?.trim()
+          || (el.tagName.match(/^H/) ? el.textContent?.trim() : '');
+        const link = linkEl?.href || linkEl?.getAttribute('href') || '';
+        const date = el.querySelector('time')?.textContent?.trim()
+          || el.querySelector('[class*="date"]')?.textContent?.trim() || '';
+        const desc = el.querySelector('p')?.textContent?.trim() || '';
+
+        if (title && title.length > 8 && !seen.has(title)) {
+          seen.add(title);
+          // 상대 링크 → 절대 링크
+          const absLink = link.startsWith('http')
+            ? link
+            : link ? `https://artpulse.im${link}` : 'https://artpulse.im/artnews';
+          articles.push({ title, link: absLink, date, desc });
+        }
+      });
+
+      return {
+        fetchedAt: new Date().toISOString(),
+        source: 'https://artpulse.im/artnews',
+        articles
+      };
+    }
+
+    function renderArticles(data) {
+      const { articles, fetchedAt, source } = data;
+
+      META.textContent = `SOURCE: ${source} — UPDATED: ${new Date(fetchedAt).toLocaleString('ko-KR')}`;
+
+      if (!articles || articles.length === 0) {
+        LIST.innerHTML = `<div class="state-box">
+          <div class="state-title">NO DATA</div>
+          <p>기사를 불러올 수 없습니다.<br>
+          스크래퍼를 실행하거나 직접 <a href="https://artpulse.im/artnews" target="_blank" style="color:var(--orange)">artpulse.im</a>을 방문하세요.</p>
+        </div>`;
+        return;
+      }
+
+      LIST.innerHTML = articles.map((a, i) => `
+        <a class="news-item" href="${a.link || 'https://artpulse.im/artnews'}" target="_blank" rel="noopener">
+          <span class="news-item-num">${String(i + 1).padStart(2, '0')}</span>
+          <div class="news-item-body">
+            <div class="news-item-source">ARTPULSE.IM</div>
+            <div class="news-item-title">${a.title}</div>
+            ${a.desc ? `<div class="news-item-desc">${a.desc}</div>` : ''}
+          </div>
+          <span class="news-item-date">${a.date || '—'}</span>
+        </a>
+      `).join('');
+    }
+
+    async function init() {
+      try {
+        // 로컬 JSON 우선
+        const data = await loadFromJson();
+        renderArticles(data);
+      } catch {
+        try {
+          // 프록시로 직접 시도
+          META.textContent = 'artpulse.im에서 실시간 데이터 로딩 중...';
+          const data = await loadFromSite();
+          renderArticles(data);
+        } catch (e) {
+          META.textContent = '데이터 로드 실패';
+          LIST.innerHTML = `<div class="state-box">
+            <div class="state-title">FETCH FAILED</div>
+            <p>뉴스를 불러오지 못했습니다.<br><br>
+            <strong style="color:var(--white)">해결 방법:</strong><br>
+            1. <code style="color:var(--orange)">scraper/</code> 폴더에서<br>
+            <code style="color:var(--orange)">npm install &amp;&amp; npm run scrape</code> 실행<br><br>
+            또는<br><br>
+            2. <a href="https://artpulse.im/artnews" target="_blank" style="color:var(--orange)">artpulse.im/artnews</a> 직접 방문</p>
+          </div>`;
+        }
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

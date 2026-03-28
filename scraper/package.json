@@ -1,0 +1,12 @@
+{
+  "name": "artree8-scraper",
+  "version": "1.0.0",
+  "description": "Scraper for artpulse.im artnews",
+  "main": "scrape.js",
+  "scripts": {
+    "scrape": "node scrape.js"
+  },
+  "dependencies": {
+    "playwright": "^1.44.0"
+  }
+}
